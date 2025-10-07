@@ -23,59 +23,74 @@
       padding: 0;
     }
 
-    body {
+    html, body {
       font-family: 'Inter', sans-serif;
+      height: 100%;
+    }
+
+    body {
       min-height: 100vh;
-      background: var(--bg-gradient);
+      background: transparent;
       color: var(--text-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      padding: clamp(12px, 4vh, 24px);
     }
 
     .shell {
       width: min(1100px, 100%);
+      height: min(720px, calc(100vh - 48px));
       background: rgba(15, 23, 42, 0.65);
       border-radius: 28px;
-      padding: 32px;
+      padding: 24px;
       box-shadow: 0 30px 80px rgba(15, 23, 42, 0.5);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
     }
 
     header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
+      align-items: flex-start;
+      gap: 16px;
     }
 
     header h1 {
-      font-size: 2rem;
+      font-size: 1.85rem;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
 
     header p {
       color: var(--text-secondary);
-      max-width: 500px;
-      line-height: 1.45;
-      margin-top: 8px;
+      max-width: 460px;
+      line-height: 1.4;
+      margin-top: 6px;
+      font-size: 0.92rem;
     }
 
     .layout {
       display: grid;
       grid-template-columns: 1.2fr 0.8fr;
-      gap: 28px;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
     }
 
     .card {
       background: var(--card-bg);
       border-radius: 22px;
-      padding: 20px;
+      padding: 18px;
       position: relative;
       border: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .card::before {
@@ -93,20 +108,495 @@
 
     .workspace {
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto minmax(0, 1fr) minmax(120px, 0.45fr);
       gap: 16px;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .desktop {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.8));
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      padding: 18px;
+      padding-bottom: 96px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .desktop::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(127, 90, 240, 0.08), rgba(44, 177, 188, 0.05));
+      pointer-events: none;
+    }
+
+    .desktop-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      min-height: 0;
+      z-index: 2;
+    }
+
+    .desktop-cursor {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(248, 250, 252, 0.85);
+      box-shadow: 0 0 12px rgba(148, 163, 184, 0.9);
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+      opacity: 0;
+      transition: left 0.55s cubic-bezier(0.22, 1, 0.36, 1), top 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+      z-index: 10;
+    }
+
+    .desktop-cursor.visible {
+      opacity: 1;
+    }
+
+    .desktop-cursor.click::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid rgba(125, 211, 252, 0.55);
+      animation: cursorClick 0.5s ease;
+    }
+
+    @keyframes cursorClick {
+      from {
+        transform: scale(0.8);
+        opacity: 0.85;
+      }
+      to {
+        transform: scale(1.3);
+        opacity: 0;
+      }
+    }
+
+    .app-launcher {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.78);
+      border-radius: 999px;
+      padding: 10px 18px;
+      display: flex;
+      gap: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 18px 38px rgba(15, 23, 42, 0.45);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .launcher-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(30, 41, 59, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 1.35rem;
+      color: var(--text-secondary);
+      box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease, color 0.35s ease;
+    }
+
+    .launcher-icon div {
+      line-height: 1;
+    }
+
+    .launcher-icon span {
+      font-size: 0.6rem;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .launcher-icon.active {
+      transform: translateY(-6px) scale(1.05);
+      background: linear-gradient(145deg, rgba(127, 90, 240, 0.75), rgba(14, 165, 233, 0.65));
+      color: white;
+      box-shadow: 0 16px 30px rgba(127, 90, 240, 0.45);
+    }
+
+    .app-window {
+      position: relative;
+      background: rgba(10, 17, 34, 0.92);
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      padding: 14px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .app-window.visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      border-color: rgba(127, 90, 240, 0.6);
+      box-shadow: 0 25px 55px rgba(127, 90, 240, 0.35);
+    }
+
+    .window-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(148, 163, 184, 0.3);
+    }
+
+    .window-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      font-size: 0.72rem;
+    }
+
+    .calendar-cell {
+      padding: 10px 6px;
+      border-radius: 10px;
+      background: rgba(148, 163, 184, 0.06);
+      text-align: center;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    .calendar-cell.busy {
+      background: rgba(248, 113, 113, 0.15);
+      border-color: rgba(248, 113, 113, 0.4);
+      color: #fca5a5;
+    }
+
+    .calendar-cell.open {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+    }
+
+    .calendar-wrap {
+      position: relative;
+    }
+
+    .calendar-scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0), rgba(56, 189, 248, 0.8), rgba(56, 189, 248, 0));
+      opacity: 0;
+    }
+
+    .app-window[data-app="calendar"].scanning .calendar-scan-line {
+      opacity: 1;
+      animation: scanDown 1.1s ease forwards;
+    }
+
+    .app-window[data-app="calendar"].scanning .calendar-cell.busy {
+      animation: busyPulse 0.9s ease forwards;
+    }
+
+    .app-window[data-app="calendar"].selected .calendar-cell.open {
+      animation: openGlow 1.2s ease forwards;
+    }
+
+    @keyframes scanDown {
+      from {
+        top: 0;
+      }
+      to {
+        top: calc(100% - 2px);
+      }
+    }
+
+    @keyframes busyPulse {
+      from {
+        box-shadow: 0 0 0 rgba(248, 113, 113, 0);
+      }
+      to {
+        box-shadow: 0 0 18px rgba(248, 113, 113, 0.45);
+      }
+    }
+
+    @keyframes openGlow {
+      from {
+        box-shadow: 0 0 0 rgba(56, 189, 248, 0);
+        transform: scale(1);
+      }
+      to {
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.65);
+        transform: scale(1.04);
+      }
+    }
+
+    .browser-search {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .search-text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.2px;
+    }
+
+    .search-text.typing::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 1.05em;
+      margin-left: 3px;
+      background: rgba(148, 163, 184, 0.6);
+      animation: caretBlink 0.7s steps(1) infinite;
+      vertical-align: bottom;
+    }
+
+    @keyframes caretBlink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .browser-progress {
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(148, 163, 184, 0.18);
+      overflow: hidden;
+      margin-bottom: 12px;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .browser-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(135deg, #38bdf8, #7f5af0);
+      transition: width 1.1s ease;
+    }
+
+    .app-window[data-app="browser"].searching .browser-progress {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .app-window[data-app="browser"].searching .browser-progress-bar {
+      width: 100%;
+    }
+
+    .app-window[data-app="browser"].results-ready .result-card:first-child {
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 14px 30px rgba(56, 189, 248, 0.18);
+      transform: translateY(-2px);
+    }
+
+    .app-window[data-app="browser"].results-ready .result-card:first-child h4 {
+      color: #38bdf8;
+    }
+
+    .browser-results {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-card {
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+
+    .result-card h4 {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .result-card p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .doc-section {
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 10px;
+    }
+
+    .doc-section h4 {
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .doc-section ul {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .doc-section li {
+      opacity: 0.45;
+      transform: translateX(-6px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .doc-section li::before {
+      content: "•";
+      color: rgba(127, 90, 240, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .app-window[data-app="docs"].drafting .doc-section li {
+      opacity: 1;
+      transform: translateX(0);
+      transition-delay: calc(var(--order, 0) * 0.12s);
+    }
+
+    .email-header {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 6px;
+      font-size: 0.78rem;
+      margin-bottom: 10px;
+    }
+
+    .email-body {
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 12px;
+      transition: box-shadow 0.4s ease, transform 0.4s ease;
+    }
+
+    .email-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .email-send {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: white;
+      font-size: 0.78rem;
+      border: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+
+    .email-status {
+      font-size: 0.72rem;
+      color: #4ade80;
+      transition: color 0.3s ease;
+    }
+
+    .app-window[data-app="email"].composing .email-body {
+      box-shadow: 0 18px 38px rgba(127, 90, 240, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .app-window[data-app="email"].ready .email-send {
+      animation: sendPulse 1.15s ease-in-out infinite alternate;
+    }
+
+    .app-window[data-app="email"].sent .email-send {
+      animation: none;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 12px 24px rgba(34, 197, 94, 0.35);
+    }
+
+    .app-window[data-app="email"].sent .email-status {
+      color: #bbf7d0;
+    }
+
+    @keyframes sendPulse {
+      from {
+        transform: translateY(0);
+        box-shadow: 0 0 0 rgba(56, 189, 248, 0);
+      }
+      to {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 22px rgba(56, 189, 248, 0.35);
+      }
     }
 
     .tools {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
+      gap: 12px;
     }
 
     .tool {
       background: rgba(15, 23, 42, 0.75);
       border-radius: 18px;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -135,11 +625,11 @@
     .timeline {
       background: rgba(12, 17, 33, 0.85);
       border-radius: 18px;
-      padding: 18px;
+      padding: 14px;
       border: 1px solid rgba(148, 163, 184, 0.08);
-      max-height: 220px;
       overflow: auto;
       scroll-behavior: smooth;
+      min-height: 0;
     }
 
     .timeline h3 {
@@ -181,19 +671,21 @@
       display: flex;
       flex-direction: column;
       height: 100%;
-      gap: 16px;
+      gap: 14px;
+      min-height: 0;
     }
 
     .chat-window {
       flex: 1;
       background: rgba(12, 17, 33, 0.85);
       border-radius: 18px;
-      padding: 20px;
+      padding: 18px;
       border: 1px solid rgba(148, 163, 184, 0.08);
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       overflow: hidden;
+      min-height: 0;
     }
 
     .messages {
@@ -203,6 +695,7 @@
       flex-direction: column;
       gap: 12px;
       padding-right: 6px;
+      min-height: 0;
     }
 
     .bubble {
@@ -307,13 +800,23 @@
 
     @media (max-width: 980px) {
       body {
-        padding: 24px 16px;
+        padding: clamp(12px, 4vh, 24px) 16px;
       }
       .layout {
         grid-template-columns: 1fr;
       }
       .shell {
         padding: 24px;
+        height: auto;
+        min-height: calc(100vh - 32px);
+      }
+      .workspace {
+        grid-template-rows: auto auto auto;
+        min-height: auto;
+      }
+      .desktop-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, minmax(0, 1fr));
       }
     }
   </style>
@@ -323,7 +826,7 @@
     <header>
       <div>
         <h1>Agentic AI Playground</h1>
-        <p>Explore how an agentic AI collaborates with you. Tap on a prompt to watch the agent plan, choose tools, and execute tasks inside its workspace, turning your intent into action.</p>
+        <p>See an agentic AI run an entire workflow—planning the offsite, researching venues, drafting the agenda, and sending the invite—without leaving its virtual desktop.</p>
       </div>
       <div class="status">
         <span class="status-dot"></span>
@@ -341,46 +844,173 @@
               <strong>Calendar</strong>
               <span>Check availability</span>
             </div>
-            <div class="tool" data-tool="email">
-              <div class="tool-icon">📧</div>
-              <strong>Email</strong>
-              <span>Draft outreach</span>
-            </div>
             <div class="tool" data-tool="browser">
               <div class="tool-icon">🌐</div>
-              <strong>Web Search</strong>
-              <span>Research info</span>
+              <strong>Browser</strong>
+              <span>Research venues</span>
             </div>
             <div class="tool" data-tool="docs">
               <div class="tool-icon">📝</div>
               <strong>Docs</strong>
-              <span>Summaries & plans</span>
+              <span>Draft itinerary</span>
             </div>
-            <div class="tool" data-tool="slides">
-              <div class="tool-icon">📊</div>
-              <strong>Slides</strong>
-              <span>Visual reporting</span>
+            <div class="tool" data-tool="email">
+              <div class="tool-icon">📧</div>
+              <strong>Email</strong>
+              <span>Send invites</span>
             </div>
-            <div class="tool" data-tool="chat">
-              <div class="tool-icon">💬</div>
-              <strong>Team Chat</strong>
-              <span>Updates & sync</span>
+          </div>
+        </div>
+        <div class="desktop" id="desktop">
+          <div class="desktop-cursor" id="desktopCursor"></div>
+          <div class="desktop-grid">
+            <div class="app-window" data-app="calendar">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Team Calendar — April 2024</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">📅</span>
+              </div>
+              <div class="calendar-wrap">
+                <div class="calendar-grid">
+                  <div class="calendar-cell">22</div>
+                  <div class="calendar-cell busy">23</div>
+                  <div class="calendar-cell busy">24</div>
+                  <div class="calendar-cell busy">25</div>
+                  <div class="calendar-cell busy">26</div>
+                  <div class="calendar-cell">27</div>
+                  <div class="calendar-cell">28</div>
+                  <div class="calendar-cell">29</div>
+                  <div class="calendar-cell busy">30</div>
+                  <div class="calendar-cell open">May 1</div>
+                  <div class="calendar-cell open">May 2</div>
+                  <div class="calendar-cell">May 3</div>
+                  <div class="calendar-cell">May 4</div>
+                  <div class="calendar-cell">May 5</div>
+                </div>
+                <div class="calendar-scan-line"></div>
+              </div>
+              <p style="margin-top: 14px; font-size: 0.78rem; color: var(--text-secondary);">Last week of April is packed. Best open stretch: May 1-2.</p>
             </div>
-            <div class="tool" data-tool="code">
-              <div class="tool-icon">💻</div>
-              <strong>Automation</strong>
-              <span>Run scripts</span>
+            <div class="app-window" data-app="browser">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Search — Coastal offsite venues</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">🌐</span>
+              </div>
+              <div class="browser-search">
+                <span>🔍</span>
+                <div class="search-text" data-text="best coastal team offsite venues near Santa Cruz late April weather">
+                  best coastal team offsite venues near Santa Cruz late April weather
+                </div>
+              </div>
+              <div class="browser-progress">
+                <div class="browser-progress-bar"></div>
+              </div>
+              <div class="browser-results">
+                <div class="result-card">
+                  <h4>Seacliff Retreat Center</h4>
+                  <p>Conference suite with ocean-view deck, accommodates 35. Forecast: 68°F and sunny on May 1-2.</p>
+                </div>
+                <div class="result-card">
+                  <h4>Redwood Dunes Lodge</h4>
+                  <p>Outdoor breakout spaces, team-building facilitators available. Weather: mild mornings, afternoon breeze.</p>
+                </div>
+                <div class="result-card">
+                  <h4>Harbor Lights Event Loft</h4>
+                  <p>Indoor-outdoor floor plan, catering partnerships, near downtown Santa Cruz hotels.</p>
+                </div>
+              </div>
             </div>
-            <div class="tool" data-tool="dashboard">
-              <div class="tool-icon">📈</div>
-              <strong>Dashboards</strong>
-              <span>Monitor metrics</span>
+            <div class="app-window" data-app="docs">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Itinerary Draft — Product Offsite</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">📝</span>
+              </div>
+              <div class="doc-section">
+                <h4>Schedule — May 1</h4>
+                <ul>
+                  <li style="--order:0">09:00 Welcome breakfast & kickoff</li>
+                  <li style="--order:1">10:00 Strategy workshop (Seacliff deck)</li>
+                  <li style="--order:2">13:00 Lunch & coastline hike</li>
+                  <li style="--order:3">16:00 Team retrospectives</li>
+                  <li style="--order:4">18:30 Sunset dinner reservation</li>
+                </ul>
+              </div>
+              <div class="doc-section">
+                <h4>Schedule — May 2</h4>
+                <ul>
+                  <li style="--order:0">09:30 Design thinking lab</li>
+                  <li style="--order:1">12:00 Food truck lunch on-site</li>
+                  <li style="--order:2">14:00 Executive AMA</li>
+                  <li style="--order:3">16:30 Wrap-up & action plan</li>
+                </ul>
+              </div>
+              <p style="font-size: 0.78rem; color: var(--text-secondary);">Budget per person: $480 including lodging, meals, and activities.</p>
+            </div>
+            <div class="app-window" data-app="email">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Compose — Product Team Offsite Invite</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">📧</span>
+              </div>
+              <div class="email-header">
+                <span>To:</span>
+                <div>product-team@aurora.io</div>
+                <span>Subject:</span>
+                <div>RSVP: Product Offsite at Seacliff Retreat (May 1-2)</div>
+              </div>
+              <div class="email-body">
+                Hi team —<br /><br />
+                I’ve booked Seacliff Retreat Center for our May 1-2 offsite. Expect sunshine (68°F) and coastal views!<br /><br />
+                Attached is the agenda with workshops, outdoor activities, and team dinner plans. Please RSVP by Friday so I can finalize headcount and shuttles.<br /><br />
+                Looking forward to building together,<br />
+                Agent Ava 🤖
+              </div>
+              <div class="email-footer">
+                <span class="email-status">Invite queued for send…</span>
+                <button class="email-send">Send Invite</button>
+              </div>
+            </div>
+          </div>
+          <div class="app-launcher">
+            <div class="launcher-icon" data-launch="calendar">
+              <div>📅</div>
+              <span>Cal</span>
+            </div>
+            <div class="launcher-icon" data-launch="browser">
+              <div>🌐</div>
+              <span>Web</span>
+            </div>
+            <div class="launcher-icon" data-launch="docs">
+              <div>📝</div>
+              <span>Doc</span>
+            </div>
+            <div class="launcher-icon" data-launch="email">
+              <div>📧</div>
+              <span>Email</span>
             </div>
           </div>
         </div>
         <div class="timeline" id="timeline">
           <h3>Agent Action Timeline</h3>
-          <p style="font-size: 0.85rem; color: var(--text-secondary);">Select a prompt to see the agent reason and act.</p>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Launch the scenario to watch each tool animate inside the workspace.</p>
         </div>
       </section>
 
@@ -396,12 +1026,9 @@
           </div>
         </div>
         <div>
-          <h3 style="font-size: 0.95rem; margin-bottom: 10px; color: var(--text-secondary);">Try a scenario</h3>
+          <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--text-secondary);">Try a scenario</h3>
           <div class="prompt-palette">
-            <button class="prompt-btn" data-scenario="offsite">Plan a team offsite</button>
-            <button class="prompt-btn" data-scenario="report">Summarize weekly metrics</button>
-            <button class="prompt-btn" data-scenario="inbox">Triage my inbox</button>
-            <button class="prompt-btn" data-scenario="code">Fix the failing test</button>
+            <button class="prompt-btn" data-scenario="offsite">Plan the product team offsite</button>
           </div>
         </div>
       </section>
@@ -411,53 +1038,90 @@
   <script>
     const scenarios = {
       offsite: {
-        user: "Plan a team offsite in late April and make sure the weather looks good.",
+        user: "Plan a two-day product team offsite near Santa Cruz at the start of May and make sure invites go out.",
         steps: [
-          { tool: "calendar", title: "Check calendars", detail: "Scan team availability the last week of April." },
-          { tool: "browser", title: "Research weather", detail: "Compare weather forecasts for coastal vs. mountain spots." },
-          { tool: "docs", title: "Draft itinerary", detail: "Outline travel, lodging, and activities based on availability." },
-          { tool: "chat", title: "Share plan", detail: "Send the itinerary to the leadership channel for approval." },
+          {
+            tool: "calendar",
+            window: "calendar",
+            title: "Check availability",
+            detail: "Scan the team's calendars for late April and early May openings.",
+            narration: "Calendars show the last week of April is packed. May 1-2 is wide open for everyone."
+          },
+          {
+            tool: "browser",
+            window: "browser",
+            title: "Research venues & weather",
+            detail: "Compare coastal retreat options and confirm the weather outlook.",
+            narration: "Seacliff Retreat Center has availability with sunny 68°F forecasts—perfect for the offsite."
+          },
+          {
+            tool: "docs",
+            window: "docs",
+            title: "Draft the itinerary",
+            detail: "Lay out sessions, meals, and activities for both days along with budget notes.",
+            narration: "Agenda drafted with workshops, outdoor time, and wrap-up moments that fit within the $480 per person budget."
+          },
+          {
+            tool: "email",
+            window: "email",
+            title: "Send invites",
+            detail: "Compose the email invite with the itinerary attached and queue it to the product team list.",
+            narration: "Invite composed with agenda highlights and RSVP request—ready to send to product-team@aurora.io."
+          }
         ],
-        response: "Here's a draft offsite plan with a sunny coastal venue, coordinated travel, and budget notes ready for approval.",
-      },
-      report: {
-        user: "Summarize this week's product metrics and call out anything unusual.",
-        steps: [
-          { tool: "dashboard", title: "Review dashboards", detail: "Pull conversion, retention, and NPS trends." },
-          { tool: "docs", title: "Analyze anomalies", detail: "Detect the dip in onboarding completion and link to release notes." },
-          { tool: "slides", title: "Visualize findings", detail: "Create a three-slide overview with charts and key insights." },
-          { tool: "email", title: "Send recap", detail: "Email the summary to product & GTM leads with next steps." },
-        ],
-        response: "Summary ready: conversions +4%, onboarding completion -6% (root cause noted), and suggested follow-ups dispatched.",
-      },
-      inbox: {
-        user: "Triage my inbox and highlight anything urgent.",
-        steps: [
-          { tool: "email", title: "Scan new mail", detail: "Sort by priority and detect deadlines or blockers." },
-          { tool: "docs", title: "Draft digests", detail: "Summarize action items with due dates and context." },
-          { tool: "chat", title: "Ping stakeholders", detail: "Nudge owners for responses where items are blocked." },
-          { tool: "calendar", title: "Block time", detail: "Reserve focus slots to tackle high-priority items." },
-        ],
-        response: "Inbox triaged: urgent items flagged, responses drafted, and focus time booked for you tomorrow morning.",
-      },
-      code: {
-        user: "Investigate and fix the failing checkout test.",
-        steps: [
-          { tool: "code", title: "Run test suite", detail: "Reproduce the failure and capture stack trace." },
-          { tool: "docs", title: "Trace change history", detail: "Review recent commits touching checkout logic." },
-          { tool: "browser", title: "Search docs", detail: "Look up API changes for payment provider version 2.1." },
-          { tool: "chat", title: "Notify team", detail: "Post fix summary with PR link to engineering channel." },
-        ],
-        response: "Checkout test repaired by updating the payment client. Added regression test and notified the team.",
-      },
+        result: "All set! I booked Seacliff Retreat for May 1-2, attached the agenda, and sent the invites to the product team."
+      }
     };
 
     const messagesEl = document.getElementById('messages');
     const timelineEl = document.getElementById('timeline');
     const promptButtons = document.querySelectorAll('.prompt-btn');
     const tools = document.querySelectorAll('.tool');
+    const windows = document.querySelectorAll('.app-window');
     const statusText = document.getElementById('statusText');
     const resetBtn = document.getElementById('resetBtn');
+    const desktop = document.getElementById('desktop');
+    const desktopCursor = document.getElementById('desktopCursor');
+    const launcherIcons = document.querySelectorAll('.launcher-icon');
+
+    const launcherMap = {};
+    launcherIcons.forEach(icon => {
+      launcherMap[icon.dataset.launch] = icon;
+    });
+
+    const windowMap = {};
+    windows.forEach(win => {
+      windowMap[win.dataset.app] = win;
+    });
+
+    const calendarWindow = windowMap.calendar;
+    const browserWindow = windowMap.browser;
+    const docsWindow = windowMap.docs;
+    const emailWindow = windowMap.email;
+
+    const calendarGrid = calendarWindow ? calendarWindow.querySelector('.calendar-grid') : null;
+    const browserSearchText = browserWindow ? browserWindow.querySelector('.search-text') : null;
+    const emailStatus = emailWindow ? emailWindow.querySelector('.email-status') : null;
+
+    const emailStatusDefault = emailStatus ? emailStatus.textContent : '';
+
+    const focusTargets = {
+      calendar: calendarGrid ? calendarGrid.querySelector('.calendar-cell.open') : null,
+      browser: browserWindow ? browserWindow.querySelector('.browser-search') : null,
+      docs: docsWindow ? docsWindow.querySelector('.doc-section li') : null,
+      email: emailWindow ? emailWindow.querySelector('.email-send') : null
+    };
+
+    const typedContent = new Map();
+    if (browserSearchText) {
+      const text = browserSearchText.dataset.text || browserSearchText.textContent.trim();
+      browserSearchText.dataset.text = text;
+      typedContent.set(browserSearchText, text);
+    }
+
+    const interactionTimers = [];
+    const typingIntervals = [];
+    const windowStateClasses = ['scanning', 'selected', 'searching', 'results-ready', 'drafting', 'composing', 'ready', 'sent'];
 
     let running = false;
 
@@ -484,6 +1148,13 @@
       tools.forEach(tool => tool.classList.remove('active'));
     }
 
+    function showWindow(appName) {
+      windows.forEach(win => {
+        const visible = win.dataset.app === appName;
+        win.classList.toggle('visible', visible);
+      });
+    }
+
     function updateStatus(text, color = '#38bdf8') {
       statusText.innerHTML = `<span class="status-dot" style="background:${color}; box-shadow:0 0 12px ${hexToRGBA(color, 0.9)};"></span>${text}`;
     }
@@ -497,12 +1168,146 @@
       return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
+    function queueInteraction(callback, delay) {
+      const id = window.setTimeout(() => {
+        const idx = interactionTimers.indexOf(id);
+        if (idx >= 0) {
+          interactionTimers.splice(idx, 1);
+        }
+        callback();
+      }, delay);
+      interactionTimers.push(id);
+    }
+
+    function clearInteractionTimers() {
+      while (interactionTimers.length) {
+        clearTimeout(interactionTimers.pop());
+      }
+    }
+
+    function clearTyping() {
+      while (typingIntervals.length) {
+        clearInterval(typingIntervals.pop());
+      }
+    }
+
+    function restoreTypedText() {
+      typedContent.forEach((text, node) => {
+        node.classList.remove('typing');
+        node.textContent = text;
+      });
+    }
+
+    function resetLaunchers() {
+      launcherIcons.forEach(icon => icon.classList.remove('active'));
+    }
+
+    function hideCursor() {
+      if (desktopCursor) {
+        desktopCursor.classList.remove('visible');
+      }
+    }
+
+    function moveCursorToElement(element) {
+      if (!desktop || !desktopCursor || !element) return;
+      const desktopRect = desktop.getBoundingClientRect();
+      const rect = element.getBoundingClientRect();
+      const x = rect.left - desktopRect.left + rect.width / 2;
+      const y = rect.top - desktopRect.top + rect.height / 2;
+      desktopCursor.classList.add('visible');
+      desktopCursor.style.left = `${x}px`;
+      desktopCursor.style.top = `${y}px`;
+    }
+
+    function simulateCursorClick() {
+      if (!desktopCursor || !desktopCursor.classList.contains('visible')) return;
+      desktopCursor.classList.remove('click');
+      void desktopCursor.offsetWidth;
+      desktopCursor.classList.add('click');
+      setTimeout(() => desktopCursor.classList.remove('click'), 320);
+    }
+
+    function clearWindowClasses(win) {
+      if (!win) return;
+      windowStateClasses.forEach(cls => win.classList.remove(cls));
+    }
+
+    function resetAllWindowSequences() {
+      windows.forEach(clearWindowClasses);
+      clearInteractionTimers();
+      clearTyping();
+      restoreTypedText();
+      if (emailStatus) {
+        emailStatus.textContent = emailStatusDefault;
+      }
+      resetLaunchers();
+      hideCursor();
+    }
+
+    function typeText(element, text, onComplete) {
+      if (!element) return;
+      let index = 0;
+      const speed = 26;
+      const timer = setInterval(() => {
+        element.textContent += text.charAt(index);
+        index += 1;
+        if (index >= text.length) {
+          clearInterval(timer);
+          const idx = typingIntervals.indexOf(timer);
+          if (idx >= 0) {
+            typingIntervals.splice(idx, 1);
+          }
+          if (onComplete) onComplete();
+        }
+      }, speed);
+      typingIntervals.push(timer);
+    }
+
+    function triggerWindowAnimation(app) {
+      const windowEl = windowMap[app];
+      if (!windowEl) return;
+      clearInteractionTimers();
+      clearWindowClasses(windowEl);
+
+      if (app === 'calendar') {
+        windowEl.classList.add('scanning');
+        queueInteraction(() => windowEl.classList.add('selected'), 900);
+      } else if (app === 'browser') {
+        const text = typedContent.get(browserSearchText);
+        clearTyping();
+        if (browserSearchText && text) {
+          browserSearchText.classList.add('typing');
+          browserSearchText.textContent = '';
+          typeText(browserSearchText, text, () => browserSearchText.classList.remove('typing'));
+        }
+        windowEl.classList.add('searching');
+        queueInteraction(() => windowEl.classList.add('results-ready'), 1700);
+      } else if (app === 'docs') {
+        windowEl.classList.add('drafting');
+      } else if (app === 'email') {
+        windowEl.classList.add('composing');
+        if (emailStatus) {
+          emailStatus.textContent = emailStatusDefault;
+        }
+        queueInteraction(() => windowEl.classList.add('ready'), 600);
+        queueInteraction(() => {
+          windowEl.classList.add('sent');
+          if (emailStatus) {
+            emailStatus.textContent = 'Invite sent to product-team@aurora.io';
+          }
+        }, 1700);
+      }
+    }
+
     function playScenario(key) {
       running = true;
       const scenario = scenarios[key];
       clearTimeline();
+      messagesEl.innerHTML = '';
+      resetAllWindowSequences();
       createBubble(scenario.user, 'user');
-      updateStatus('Agent thinking…', '#f97316');
+      updateStatus('Agent reviewing plan…', '#f97316');
+      showWindow(null);
 
       const stepsFragment = document.createDocumentFragment();
 
@@ -518,24 +1323,61 @@
 
       const stepElements = timelineEl.querySelectorAll('.step');
 
+      const baseDelay = 700;
+      const stepDuration = 4000;
+
       scenario.steps.forEach((step, index) => {
+        const delay = baseDelay + index * stepDuration;
+        const launcher = launcherMap[step.tool];
+        const focus = focusTargets[step.window];
+
         setTimeout(() => {
           setToolsActive(step.tool);
           stepElements.forEach(el => el.classList.remove('active'));
           stepElements[index].classList.add('active');
           updateStatus(`Agent executing: ${step.title}`, '#7f5af0');
-        }, index * 2200 + 600);
+        }, delay);
+
+        if (launcher) {
+          setTimeout(() => {
+            resetLaunchers();
+            launcher.classList.add('active');
+            moveCursorToElement(launcher);
+          }, delay + 180);
+
+          setTimeout(() => simulateCursorClick(), delay + 430);
+        } else {
+          setTimeout(() => resetLaunchers(), delay + 180);
+        }
+
+        setTimeout(() => {
+          showWindow(step.window);
+          triggerWindowAnimation(step.window);
+        }, delay + 780);
+
+        if (focus) {
+          setTimeout(() => moveCursorToElement(focus), delay + 1220);
+          setTimeout(() => simulateCursorClick(), delay + 1500);
+        }
+
+        setTimeout(() => {
+          createBubble(step.narration, 'agent');
+        }, delay + 2100);
       });
+
+      const completionDelay = baseDelay + scenario.steps.length * stepDuration + 1900;
 
       setTimeout(() => {
         resetTools();
         stepElements.forEach(el => el.classList.remove('active'));
-        createBubble(scenario.response, 'agent');
+        createBubble(scenario.result, 'agent');
         updateStatus('Agent ready for another task', '#22c55e');
         running = false;
         resetBtn.hidden = false;
         promptButtons.forEach(btn => (btn.disabled = false));
-      }, scenario.steps.length * 2200 + 1100);
+        resetLaunchers();
+        hideCursor();
+      }, completionDelay);
     }
 
     promptButtons.forEach(button => {
@@ -552,7 +1394,11 @@
       messagesEl.innerHTML = '';
       clearTimeline();
       resetTools();
+      resetAllWindowSequences();
       updateStatus('Waiting for your prompt', '#38bdf8');
+      showWindow(null);
+      promptButtons.forEach(btn => (btn.disabled = false));
+      resetBtn.hidden = true;
     });
   </script>
 </body>
