@@ -1176,10 +1176,25 @@
       if (!desktop || !desktopGrid) return;
       const dockAllowance = launcherDock ? launcherDock.offsetHeight + 28 : 0;
       const availableHeight = desktop.clientHeight - dockAllowance;
+      const availableWidth = desktop.clientWidth;
       const gridHeight = desktopGrid.scrollHeight;
-      if (availableHeight > 0 && gridHeight > availableHeight) {
-        const scale = Math.max(0.85, (availableHeight - 6) / gridHeight);
-        desktopGrid.style.transform = `scale(${scale})`;
+      const gridWidth = desktopGrid.scrollWidth;
+
+      let scaleHeight = 1;
+      let scaleWidth = 1;
+
+      if (availableHeight > 12 && gridHeight > availableHeight) {
+        scaleHeight = (availableHeight - 6) / gridHeight;
+      }
+
+      if (availableWidth > 12 && gridWidth > availableWidth) {
+        scaleWidth = (availableWidth - 6) / gridWidth;
+      }
+
+      const scale = Math.min(scaleHeight, scaleWidth);
+
+      if (scale < 1) {
+        desktopGrid.style.transform = `scale(${Math.max(0.78, scale)})`;
       } else {
         desktopGrid.style.transform = '';
       }
