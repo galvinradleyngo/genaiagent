@@ -1083,6 +1083,8 @@
     const desktop = document.getElementById('desktop');
     const desktopCursor = document.getElementById('desktopCursor');
     const launcherIcons = document.querySelectorAll('.launcher-icon');
+    const desktopGrid = desktop ? desktop.querySelector('.desktop-grid') : null;
+    const launcherDock = desktop ? desktop.querySelector('.app-launcher') : null;
 
     const launcherMap = {};
     launcherIcons.forEach(icon => {
@@ -1242,6 +1244,7 @@
       }
       resetLaunchers();
       hideCursor();
+      updateDesktopScale();
     }
 
     function typeText(element, text, onComplete) {
@@ -1353,6 +1356,7 @@
         setTimeout(() => {
           showWindow(step.window);
           triggerWindowAnimation(step.window);
+          updateDesktopScale();
         }, delay + 780);
 
         if (focus) {
@@ -1400,6 +1404,12 @@
       promptButtons.forEach(btn => (btn.disabled = false));
       resetBtn.hidden = true;
     });
+
+    window.addEventListener('resize', () => {
+      window.requestAnimationFrame(updateDesktopScale);
+    });
+
+    updateDesktopScale();
   </script>
 </body>
 </html>
