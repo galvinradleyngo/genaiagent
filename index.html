@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic AI Playground</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top left, #7f5af0, transparent 55%),
+        radial-gradient(circle at bottom right, #2cb1bc, transparent 45%),
+        #0f172a;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --accent: #7f5af0;
+      --accent-soft: rgba(127, 90, 240, 0.25);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5f5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      font-family: 'Inter', sans-serif;
+      height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background: transparent;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 4vh, 24px);
+    }
+
+    .shell {
+      width: min(1100px, 100%);
+      height: min(720px, calc(100vh - 48px));
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 28px;
+      padding: 24px;
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    header h1 {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: var(--text-secondary);
+      max-width: 460px;
+      line-height: 1.4;
+      margin-top: 6px;
+      font-size: 0.92rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 18px;
+      position: relative;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(127, 90, 240, 0.35), rgba(44, 177, 188, 0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) minmax(120px, 0.45fr);
+      gap: 16px;
+      min-height: 0;
+      height: 100%;
+    }
+
+    .desktop {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.8));
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      padding: 18px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .desktop::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(127, 90, 240, 0.08), rgba(44, 177, 188, 0.05));
+      pointer-events: none;
+    }
+
+    .desktop-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .app-window {
+      position: relative;
+      background: rgba(10, 17, 34, 0.92);
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      padding: 14px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+      min-height: 0;
+    }
+
+    .app-window.visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      border-color: rgba(127, 90, 240, 0.6);
+      box-shadow: 0 25px 55px rgba(127, 90, 240, 0.35);
+    }
+
+    .window-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(148, 163, 184, 0.3);
+    }
+
+    .window-title {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      font-size: 0.72rem;
+    }
+
+    .calendar-cell {
+      padding: 10px 6px;
+      border-radius: 10px;
+      background: rgba(148, 163, 184, 0.06);
+      text-align: center;
+      color: var(--text-secondary);
+      border: 1px solid transparent;
+    }
+
+    .calendar-cell.busy {
+      background: rgba(248, 113, 113, 0.15);
+      border-color: rgba(248, 113, 113, 0.4);
+      color: #fca5a5;
+    }
+
+    .calendar-cell.open {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #4ade80;
+    }
+
+    .browser-search {
+      background: rgba(15, 23, 42, 0.65);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .browser-results {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .result-card {
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .result-card h4 {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .result-card p {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.3;
+    }
+
+    .doc-section {
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 10px;
+    }
+
+    .doc-section h4 {
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .doc-section ul {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+
+    .email-header {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 6px;
+      font-size: 0.78rem;
+      margin-bottom: 10px;
+    }
+
+    .email-body {
+      background: rgba(148, 163, 184, 0.08);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      border: 1px solid rgba(148, 163, 184, 0.1);
+      margin-bottom: 12px;
+    }
+
+    .email-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .email-send {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: white;
+      font-size: 0.78rem;
+      border: none;
+    }
+
+    .email-status {
+      font-size: 0.72rem;
+      color: #4ade80;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .tool {
+      background: rgba(15, 23, 42, 0.75);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool.active {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(127, 90, 240, 0.35);
+      border-color: rgba(127, 90, 240, 0.6);
+    }
+
+    .tool-icon {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .tool span {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .timeline {
+      background: rgba(12, 17, 33, 0.85);
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      overflow: auto;
+      scroll-behavior: smooth;
+      min-height: 0;
+    }
+
+    .timeline h3 {
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      color: var(--text-secondary);
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(148, 163, 184, 0.08);
+      margin-bottom: 10px;
+      border-left: 3px solid transparent;
+      transition: border-color 0.3s ease, background 0.3s ease;
+    }
+
+    .step.active {
+      border-color: var(--accent);
+      background: rgba(127, 90, 240, 0.15);
+      box-shadow: 0 12px 24px rgba(127, 90, 240, 0.25);
+    }
+
+    .step strong {
+      font-size: 0.9rem;
+    }
+
+    .step p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .chat {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .chat-window {
+      flex: 1;
+      background: rgba(12, 17, 33, 0.85);
+      border-radius: 18px;
+      padding: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 6px;
+      min-height: 0;
+    }
+
+    .bubble {
+      max-width: 85%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      line-height: 1.5;
+      font-size: 0.92rem;
+      position: relative;
+      animation: fadeUp 0.5s ease;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #7f5af0, #6244d3);
+    }
+
+    .bubble.agent {
+      align-self: flex-start;
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .prompt-palette {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .prompt-btn {
+      background: rgba(127, 90, 240, 0.12);
+      border: 1px solid rgba(127, 90, 240, 0.4);
+      border-radius: 14px;
+      padding: 12px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+      text-align: left;
+      line-height: 1.3;
+    }
+
+    .prompt-btn:hover:not([disabled]) {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(127, 90, 240, 0.28);
+      background: rgba(127, 90, 240, 0.25);
+    }
+
+    .prompt-btn[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-right: 6px;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reset {
+      background: transparent;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .reset:hover {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 980px) {
+      body {
+        padding: clamp(12px, 4vh, 24px) 16px;
+      }
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .shell {
+        padding: 24px;
+        height: auto;
+        min-height: calc(100vh - 32px);
+      }
+      .workspace {
+        grid-template-rows: auto auto auto;
+        min-height: auto;
+      }
+      .desktop-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div>
+        <h1>Agentic AI Playground</h1>
+        <p>See an agentic AI run an entire workflow—planning the offsite, researching venues, drafting the agenda, and sending the invite—without leaving its virtual desktop.</p>
+      </div>
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>Agent Online</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="card workspace">
+        <div>
+          <h2 style="font-size: 1.05rem; margin-bottom: 12px; color: var(--text-secondary);">Agent Workspace</h2>
+          <div class="tools" id="tools">
+            <div class="tool" data-tool="calendar">
+              <div class="tool-icon">📅</div>
+              <strong>Calendar</strong>
+              <span>Check availability</span>
+            </div>
+            <div class="tool" data-tool="browser">
+              <div class="tool-icon">🌐</div>
+              <strong>Browser</strong>
+              <span>Research venues</span>
+            </div>
+            <div class="tool" data-tool="docs">
+              <div class="tool-icon">📝</div>
+              <strong>Docs</strong>
+              <span>Draft itinerary</span>
+            </div>
+            <div class="tool" data-tool="email">
+              <div class="tool-icon">📧</div>
+              <strong>Email</strong>
+              <span>Send invites</span>
+            </div>
+          </div>
+        </div>
+        <div class="desktop" id="desktop">
+          <div class="desktop-grid">
+            <div class="app-window" data-app="calendar">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Team Calendar — April 2024</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">📅</span>
+              </div>
+              <div class="calendar-grid">
+                <div class="calendar-cell">22</div>
+                <div class="calendar-cell busy">23</div>
+                <div class="calendar-cell busy">24</div>
+                <div class="calendar-cell busy">25</div>
+                <div class="calendar-cell busy">26</div>
+                <div class="calendar-cell">27</div>
+                <div class="calendar-cell">28</div>
+                <div class="calendar-cell">29</div>
+                <div class="calendar-cell busy">30</div>
+                <div class="calendar-cell open">May 1</div>
+                <div class="calendar-cell open">May 2</div>
+                <div class="calendar-cell">May 3</div>
+                <div class="calendar-cell">May 4</div>
+                <div class="calendar-cell">May 5</div>
+              </div>
+              <p style="margin-top: 14px; font-size: 0.78rem; color: var(--text-secondary);">Last week of April is packed. Best open stretch: May 1-2.</p>
+            </div>
+            <div class="app-window" data-app="browser">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Search — Coastal offsite venues</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">🌐</span>
+              </div>
+              <div class="browser-search">
+                <span>🔍</span>
+                <div>
+                  best coastal team offsite venues near Santa Cruz late April weather
+                </div>
+              </div>
+              <div class="browser-results">
+                <div class="result-card">
+                  <h4>Seacliff Retreat Center</h4>
+                  <p>Conference suite with ocean-view deck, accommodates 35. Forecast: 68°F and sunny on May 1-2.</p>
+                </div>
+                <div class="result-card">
+                  <h4>Redwood Dunes Lodge</h4>
+                  <p>Outdoor breakout spaces, team-building facilitators available. Weather: mild mornings, afternoon breeze.</p>
+                </div>
+                <div class="result-card">
+                  <h4>Harbor Lights Event Loft</h4>
+                  <p>Indoor-outdoor floor plan, catering partnerships, near downtown Santa Cruz hotels.</p>
+                </div>
+              </div>
+            </div>
+            <div class="app-window" data-app="docs">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Itinerary Draft — Product Offsite</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">📝</span>
+              </div>
+              <div class="doc-section">
+                <h4>Schedule — May 1</h4>
+                <ul>
+                  <li>09:00 Welcome breakfast & kickoff</li>
+                  <li>10:00 Strategy workshop (Seacliff deck)</li>
+                  <li>13:00 Lunch & coastline hike</li>
+                  <li>16:00 Team retrospectives</li>
+                  <li>18:30 Sunset dinner reservation</li>
+                </ul>
+              </div>
+              <div class="doc-section">
+                <h4>Schedule — May 2</h4>
+                <ul>
+                  <li>09:30 Design thinking lab</li>
+                  <li>12:00 Food truck lunch on-site</li>
+                  <li>14:00 Executive AMA</li>
+                  <li>16:30 Wrap-up & action plan</li>
+                </ul>
+              </div>
+              <p style="font-size: 0.78rem; color: var(--text-secondary);">Budget per person: $480 including lodging, meals, and activities.</p>
+            </div>
+            <div class="app-window" data-app="email">
+              <div class="window-header">
+                <div class="window-dots">
+                  <span class="window-dot" style="background:#f87171"></span>
+                  <span class="window-dot" style="background:#fbbf24"></span>
+                  <span class="window-dot" style="background:#34d399"></span>
+                </div>
+                <span class="window-title">Compose — Product Team Offsite Invite</span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">📧</span>
+              </div>
+              <div class="email-header">
+                <span>To:</span>
+                <div>product-team@aurora.io</div>
+                <span>Subject:</span>
+                <div>RSVP: Product Offsite at Seacliff Retreat (May 1-2)</div>
+              </div>
+              <div class="email-body">
+                Hi team —<br /><br />
+                I’ve booked Seacliff Retreat Center for our May 1-2 offsite. Expect sunshine (68°F) and coastal views!<br /><br />
+                Attached is the agenda with workshops, outdoor activities, and team dinner plans. Please RSVP by Friday so I can finalize headcount and shuttles.<br /><br />
+                Looking forward to building together,<br />
+                Agent Ava 🤖
+              </div>
+              <div class="email-footer">
+                <span class="email-status">Invite queued for send…</span>
+                <button class="email-send">Send Invite</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="timeline" id="timeline">
+          <h3>Agent Action Timeline</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary);">Launch the scenario to watch each tool animate inside the workspace.</p>
+        </div>
+      </section>
+
+      <section class="card chat">
+        <div class="chat-window">
+          <div class="messages" id="messages"></div>
+          <div class="status-bar">
+            <div class="status" id="statusText">
+              <span class="status-dot" style="background:#38bdf8; box-shadow:0 0 12px rgba(56,189,248,0.9);"></span>
+              Waiting for your prompt
+            </div>
+            <button class="reset" id="resetBtn" hidden>Reset</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size: 0.95rem; margin-bottom: 8px; color: var(--text-secondary);">Try a scenario</h3>
+          <div class="prompt-palette">
+            <button class="prompt-btn" data-scenario="offsite">Plan the product team offsite</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const scenarios = {
+      offsite: {
+        user: "Plan a two-day product team offsite near Santa Cruz at the start of May and make sure invites go out.",
+        steps: [
+          {
+            tool: "calendar",
+            window: "calendar",
+            title: "Check availability",
+            detail: "Scan the team's calendars for late April and early May openings.",
+            narration: "Calendars show the last week of April is packed. May 1-2 is wide open for everyone."
+          },
+          {
+            tool: "browser",
+            window: "browser",
+            title: "Research venues & weather",
+            detail: "Compare coastal retreat options and confirm the weather outlook.",
+            narration: "Seacliff Retreat Center has availability with sunny 68°F forecasts—perfect for the offsite."
+          },
+          {
+            tool: "docs",
+            window: "docs",
+            title: "Draft the itinerary",
+            detail: "Lay out sessions, meals, and activities for both days along with budget notes.",
+            narration: "Agenda drafted with workshops, outdoor time, and wrap-up moments that fit within the $480 per person budget."
+          },
+          {
+            tool: "email",
+            window: "email",
+            title: "Send invites",
+            detail: "Compose the email invite with the itinerary attached and queue it to the product team list.",
+            narration: "Invite composed with agenda highlights and RSVP request—ready to send to product-team@aurora.io."
+          }
+        ],
+        result: "All set! I booked Seacliff Retreat for May 1-2, attached the agenda, and sent the invites to the product team."
+      }
+    };
+
+    const messagesEl = document.getElementById('messages');
+    const timelineEl = document.getElementById('timeline');
+    const promptButtons = document.querySelectorAll('.prompt-btn');
+    const tools = document.querySelectorAll('.tool');
+    const windows = document.querySelectorAll('.app-window');
+    const statusText = document.getElementById('statusText');
+    const resetBtn = document.getElementById('resetBtn');
+
+    let running = false;
+
+    function createBubble(text, type) {
+      const bubble = document.createElement('div');
+      bubble.className = `bubble ${type}`;
+      bubble.textContent = text;
+      messagesEl.appendChild(bubble);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function clearTimeline() {
+      const extraSteps = timelineEl.querySelectorAll('.step');
+      extraSteps.forEach(step => step.remove());
+    }
+
+    function setToolsActive(toolName) {
+      tools.forEach(tool => {
+        tool.classList.toggle('active', tool.dataset.tool === toolName);
+      });
+    }
+
+    function resetTools() {
+      tools.forEach(tool => tool.classList.remove('active'));
+    }
+
+    function showWindow(appName) {
+      windows.forEach(win => {
+        const visible = win.dataset.app === appName;
+        win.classList.toggle('visible', visible);
+      });
+    }
+
+    function updateStatus(text, color = '#38bdf8') {
+      statusText.innerHTML = `<span class="status-dot" style="background:${color}; box-shadow:0 0 12px ${hexToRGBA(color, 0.9)};"></span>${text}`;
+    }
+
+    function hexToRGBA(hex, alpha) {
+      const trimmed = hex.replace('#', '');
+      const bigint = parseInt(trimmed, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    function playScenario(key) {
+      running = true;
+      const scenario = scenarios[key];
+      clearTimeline();
+      messagesEl.innerHTML = '';
+      createBubble(scenario.user, 'user');
+      updateStatus('Agent reviewing plan…', '#f97316');
+      showWindow(null);
+
+      const stepsFragment = document.createDocumentFragment();
+
+      scenario.steps.forEach((step, index) => {
+        const stepEl = document.createElement('div');
+        stepEl.className = 'step';
+        stepEl.innerHTML = `<div><strong>${index + 1}. ${step.title}</strong><p>${step.detail}</p></div>`;
+        stepsFragment.appendChild(stepEl);
+      });
+
+      timelineEl.appendChild(stepsFragment);
+      timelineEl.scrollTop = 0;
+
+      const stepElements = timelineEl.querySelectorAll('.step');
+
+      const baseDelay = 700;
+      const stepDuration = 3200;
+
+      scenario.steps.forEach((step, index) => {
+        const delay = baseDelay + index * stepDuration;
+        setTimeout(() => {
+          setToolsActive(step.tool);
+          showWindow(step.window);
+          stepElements.forEach(el => el.classList.remove('active'));
+          stepElements[index].classList.add('active');
+          updateStatus(`Agent executing: ${step.title}`, '#7f5af0');
+        }, delay);
+
+        setTimeout(() => {
+          createBubble(step.narration, 'agent');
+        }, delay + 1100);
+      });
+
+      const completionDelay = baseDelay + scenario.steps.length * stepDuration + 1500;
+
+      setTimeout(() => {
+        resetTools();
+        stepElements.forEach(el => el.classList.remove('active'));
+        createBubble(scenario.result, 'agent');
+        updateStatus('Agent ready for another task', '#22c55e');
+        running = false;
+        resetBtn.hidden = false;
+        promptButtons.forEach(btn => (btn.disabled = false));
+      }, completionDelay);
+    }
+
+    promptButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (running) return;
+        promptButtons.forEach(btn => (btn.disabled = true));
+        resetBtn.hidden = true;
+        playScenario(button.dataset.scenario);
+      });
+    });
+
+    resetBtn.addEventListener('click', () => {
+      running = false;
+      messagesEl.innerHTML = '';
+      clearTimeline();
+      resetTools();
+      updateStatus('Waiting for your prompt', '#38bdf8');
+      showWindow(null);
+      promptButtons.forEach(btn => (btn.disabled = false));
+      resetBtn.hidden = true;
+    });
+  </script>
+</body>
+</html>
